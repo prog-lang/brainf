@@ -1,5 +1,5 @@
 [package]
-name = "brainf-rs"
+name = "brainf"
 version = "0.1.0"
 authors = ["Viktor A. Rozenko Voitenko <sharp.vik@gmail.com>"]
 edition = "2018"
