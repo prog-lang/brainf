@@ -9,7 +9,7 @@ license = "MIT"
 repository = "https://github.com/sharpvik/brainf-rs/"
 
 [dependencies]
-text_io = "*"
-clap = "*"
-colored = "*"
-idioma = "*"
+text_io = "0.1.8"
+clap = "2.33.3"
+colored = "2.0.0"
+idioma = "0.0.3"
