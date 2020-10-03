@@ -1,11 +1,15 @@
 #![allow(dead_code)]
 
+extern crate idioma;
+
 use std::{
-    io, io::prelude::*,
+    io::prelude::*,
     fs::File,
 };
 
-use crate::shared::{*, Instruction::*};
+use idioma::*;
+
+use crate::shared::Instruction::{self, *};
 
 
 pub struct Preprocessor {
@@ -35,44 +39,15 @@ impl Preprocessor {
 
     /// Returns `Preprocessor` instance with `bytes` set by reading the file specified by `path`.
     /// You will most likely use this constructor to generate instances of `Preprocessor`.
-    ///
-    /// # Arguments
-    ///
-    /// * `path: &String` - Path to the source code file.
-    ///
-    /// # Examples
-    ///
-    /// This is the most common way to preprocess your Brainf code.
-    ///
-    /// ```
-    /// fn run() -> Result<(), Error> {
-    ///     let path = String::from("brainf/examples/hello-world.bf");
-    ///     let mut pre = Preprocessor::read(&path);
-    ///     let result = pre.process()?;
-    ///     // do something with the result
-    ///     Ok(())
-    /// }
-    /// ```
-    pub fn read(path: &str) -> io::Result<Self> {
+    /// See `main.rs` for more usage information.
+    pub fn read(path: &str) -> Result<Self, Error> {
         let mut pre = Preprocessor::new();
-        let mut file = File::open(path)?;
-        file.read_to_end(&mut pre.bytes)?;
+        let mut file = idioma::into(File::open(path))?;
+        idioma::into(file.read_to_end(&mut pre.bytes))?;
         Ok(pre)
     }
 
-    /// # Examples
-    ///
-    /// This is the most common way to preprocess your Brainf code.
-    ///
-    /// ```
-    /// fn run() -> Result<(), Error> {
-    ///     let path = String::from("brainf/examples/hello-world.bf");
-    ///     let mut pre = Preprocessor::read(&path);
-    ///     let result = pre.process()?;
-    ///     // do something with the result
-    ///     Ok(())
-    /// }
-    /// ```
+    /// Uses `self.bytes` to preprocess Brainf code. See `main.rs` for more usage information.
     pub fn process(&mut self) -> Result<(), Error> {
         // I had to do this through indices because Rust didn't allow me to pass self as mutable to
         // match_byte within a loop that borrows self as immutable due to .iter().
@@ -82,7 +57,8 @@ impl Preprocessor {
 
         if self.stack.is_empty() { return Ok(()); }
         // The .unwrap() here is justified as we've checked that stack is not empty.
-        Err(format!("bracket at position {} does not have a pair", self.stack.pop().unwrap()))
+        Err(error(format!("Bracket at position {} does not have a pair",
+                    self.stack.pop().unwrap())))
     }
 }
 
@@ -111,7 +87,7 @@ impl Preprocessor {
         let jump_index;
         let top = self.stack.pop();
         match top {
-            None => return Err("brackets mismatched".to_string()),
+            None => return Err(error("Brackets mismatched")),
             Some(index) => jump_index = index,
         }
 
@@ -120,7 +96,7 @@ impl Preprocessor {
             self.instructions[jump_index] = Jump(Some(self.instructions.len()));
             self.instructions.push(Back(Some(jump_index)));
         } else {
-            return Err("back instruction has an invalid matching jump".to_string());
+            return Err(error("Back instruction has an invalid matching jump"));
         }
 
         Ok(())

@@ -1,0 +1,2 @@
++ [ [ [ ] ]
+  ^ this bracket is lonely :(

@@ -1,18 +1,17 @@
 #![macro_use] extern crate text_io;
 extern crate clap;
+extern crate idioma;
 
 mod shared;
 mod preprocessor;
 mod tape;
 mod vm;
-mod util;
 
 use clap::{Arg, App};
 
-use shared::*;
 use vm::VM;
 use crate::preprocessor::Preprocessor;
-use crate::util::exit_with_error;
+use idioma::*;
 
 
 fn main() -> Result<(), Error> {
@@ -29,12 +28,8 @@ fn main() -> Result<(), Error> {
     // Unwrap is justified here. If it fails, Clap will show a helpful error message.
     let source = matches.value_of("SOURCE").unwrap();
 
-    let pre = Preprocessor::read(source);
-    if let Ok(mut preprocessor) = pre {
-        preprocessor.process()?;
-        VM::init(preprocessor.instructions).boot()?;
-    } else {
-        exit_with_error("Failed to read source");
-    }
+    let mut pre = exit_if_error(Preprocessor::read(source))?;
+    exit_if_error(pre.process())?;
+    exit_if_error(VM::init(pre.instructions).boot())?;
     Ok(())
 }

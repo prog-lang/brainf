@@ -5,5 +5,3 @@ pub enum Instruction {
     Output, Input,
     Jump(Option<usize>), Back(Option<usize>),
 }
-
-pub type Error = String;

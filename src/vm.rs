@@ -1,5 +1,8 @@
 #![allow(dead_code)]
 
+extern crate idioma;
+
+use idioma::*;
 use crate::tape::Tape;
 use crate::shared::{*, Instruction::*};
 
@@ -19,6 +22,7 @@ impl VM {
         }
     }
 
+    /// Returns new instance of `VM` with `program` field specified by the parameter.
     pub fn init(program: Vec<Instruction>) -> Self {
         VM {
             memory: Tape::new(),
@@ -27,6 +31,7 @@ impl VM {
         }
     }
 
+    /// Enters the main execution loop and returns an error if encountered during execution.
     pub fn boot(&mut self) -> Result<(), Error> {
         while self.ip < self.program.len() {
             self.exec()?;
@@ -58,7 +63,7 @@ impl VM {
             }
             Ok(())
         } else {
-            Err("empty jump location pointer".to_string())
+            Err(error("empty jump location pointer"))
         }
     }
 }
