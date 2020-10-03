@@ -1,9 +1,9 @@
 #![allow(dead_code)]
 
+use text_io::read;
+
 use std::{
     fmt,
-    io, io::Read,
-    process,
     collections::VecDeque,
 };
 
@@ -57,12 +57,8 @@ impl Tape {
 
     /// Read one byte from stdin and replace current cell's value with it.
     pub fn input(&mut self) {
-        let mut buf: [u8; 1] = [127];
-        if let Err(e) = io::stdin().lock().read_exact(&mut buf) {
-            eprintln!("{}", e);
-            process::exit(1);
-        }
-        self.current_cell().value = buf[0];
+        let c: char = read!();
+        self.current_cell().value = c as u8;
     }
 
     pub fn current_cell_is_zero(&self) -> bool {

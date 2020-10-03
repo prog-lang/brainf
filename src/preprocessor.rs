@@ -5,15 +5,13 @@ use std::{
     fs::File,
 };
 
-use crate::shared::Instruction;
+use crate::shared::{*, Instruction::*};
 
-
-pub type Error = String;
 
 pub struct Preprocessor {
     bytes: Vec<u8>,
     stack: Vec<usize>,
-    instructions: Vec<Instruction>,
+    pub instructions: Vec<Instruction>,
 }
 
 // Public interface.
@@ -55,7 +53,7 @@ impl Preprocessor {
     ///     Ok(())
     /// }
     /// ```
-    pub fn read(path: &String) -> io::Result<Self> {
+    pub fn read(path: &str) -> io::Result<Self> {
         let mut pre = Preprocessor::new();
         let mut file = File::open(path)?;
         file.read_to_end(&mut pre.bytes)?;
@@ -91,12 +89,12 @@ impl Preprocessor {
 impl Preprocessor {
     fn match_byte(&mut self, byte: u8) -> Result<(), Error> {
         match byte {
-            b'>' => self.instructions.push(Instruction::Right),
-            b'<' => self.instructions.push(Instruction::Left),
-            b'+' => self.instructions.push(Instruction::Increment),
-            b'-' => self.instructions.push(Instruction::Decrement),
-            b'.' => self.instructions.push(Instruction::Output),
-            b',' => self.instructions.push(Instruction::Input),
+            b'>' => self.instructions.push(Right),
+            b'<' => self.instructions.push(Left),
+            b'+' => self.instructions.push(Increment),
+            b'-' => self.instructions.push(Decrement),
+            b'.' => self.instructions.push(Output),
+            b',' => self.instructions.push(Input),
             b'[' => self.jump(),
             b']' => self.back()?,
             _ => (),
@@ -106,7 +104,7 @@ impl Preprocessor {
 
     fn jump(&mut self) {
         self.stack.push(self.instructions.len());
-        self.instructions.push(Instruction::Jump(None));
+        self.instructions.push(Jump(None));
     }
 
     fn back(&mut self) -> Result<(), Error> {
@@ -118,9 +116,9 @@ impl Preprocessor {
         }
 
         let jump_instruction = &self.instructions[jump_index];
-        if let &Instruction::Jump(_) = jump_instruction {
-            self.instructions[jump_index] = Instruction::Jump(Some(self.instructions.len()));
-            self.instructions.push(Instruction::Back(Some(jump_index)));
+        if let &Jump(_) = jump_instruction {
+            self.instructions[jump_index] = Jump(Some(self.instructions.len()));
+            self.instructions.push(Back(Some(jump_index)));
         } else {
             return Err("back instruction has an invalid matching jump".to_string());
         }
@@ -132,7 +130,6 @@ impl Preprocessor {
 #[cfg(test)]
 mod preprocessor_tests {
     use super::*;
-    use Instruction::*;
 
     #[test]
     fn preprocess_good_code() -> Result<(), Error> {
